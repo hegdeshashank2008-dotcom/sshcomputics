@@ -114,8 +114,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <FloatingBackground />
+      <Navbar />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        © {new Date().getFullYear()} Shashank Computics · Code · Create · Innovate
+      </footer>
+      <Toaster />
     </QueryClientProvider>
   );
 }
+
