@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CollegesRouteImport } from './routes/colleges'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as MaterialsRouteImport } from './routes/materials'
 import { Route as ResourcesRouteImport } from './routes/resources'
@@ -17,6 +18,11 @@ import { Route as ResourcesRouteImport } from './routes/resources'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollegesRoute = CollegesRouteImport.update({
+  id: '/colleges',
+  path: '/colleges',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -37,12 +43,14 @@ const ResourcesRoute = ResourcesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
   '/resources': typeof ResourcesRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/events' | '/materials' | '/resources'
+  fullPaths: '/' | '/colleges' | '/events' | '/materials' | '/resources'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/events' | '/materials' | '/resources'
-  id: '__root__' | '/' | '/events' | '/materials' | '/resources'
+  to: '/' | '/colleges' | '/events' | '/materials' | '/resources'
+  id: '__root__' | '/' | '/colleges' | '/events' | '/materials' | '/resources'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CollegesRoute: typeof CollegesRoute
   EventsRoute: typeof EventsRoute
   MaterialsRoute: typeof MaterialsRoute
   ResourcesRoute: typeof ResourcesRoute
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colleges': {
+      id: '/colleges'
+      path: '/colleges'
+      fullPath: '/colleges'
+      preLoaderRoute: typeof CollegesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CollegesRoute: CollegesRoute,
   EventsRoute: EventsRoute,
   MaterialsRoute: MaterialsRoute,
   ResourcesRoute: ResourcesRoute,
