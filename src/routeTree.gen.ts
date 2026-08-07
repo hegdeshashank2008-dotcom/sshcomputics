@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CollegesRouteImport } from './routes/colleges'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as MaterialsRouteImport } from './routes/materials'
+import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResourcesRouteImport } from './routes/resources'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const MaterialsRoute = MaterialsRouteImport.update({
   path: '/materials',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,23 @@ export interface FileRoutesById {
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
   '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/colleges' | '/events' | '/materials' | '/resources'
+  fullPaths:
+    '/' | '/colleges' | '/events' | '/materials' | '/quiz' | '/resources'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/colleges' | '/events' | '/materials' | '/resources'
-  id: '__root__' | '/' | '/colleges' | '/events' | '/materials' | '/resources'
+  to: '/' | '/colleges' | '/events' | '/materials' | '/quiz' | '/resources'
+  id:
+    | '__root__'
+    | '/'
+    | '/colleges'
+    | '/events'
+    | '/materials'
+    | '/quiz'
+    | '/resources'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +93,7 @@ export interface RootRouteChildren {
   CollegesRoute: typeof CollegesRoute
   EventsRoute: typeof EventsRoute
   MaterialsRoute: typeof MaterialsRoute
+  QuizRoute: typeof QuizRoute
   ResourcesRoute: typeof ResourcesRoute
 }
 
@@ -109,6 +127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MaterialsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources': {
       id: '/resources'
       path: '/resources'
@@ -124,6 +149,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollegesRoute: CollegesRoute,
   EventsRoute: EventsRoute,
   MaterialsRoute: MaterialsRoute,
+  QuizRoute: QuizRoute,
   ResourcesRoute: ResourcesRoute,
 }
 export const routeTree = rootRouteImport
