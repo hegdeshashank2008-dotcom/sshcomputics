@@ -14,16 +14,344 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      college_feedback: {
+        Row: {
+          author_name: string
+          college_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          college_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          college_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "college_feedback_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "colleges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colleges: {
+        Row: {
+          avg_package: number | null
+          branches: Json
+          college_type: string | null
+          created_at: string
+          district: string
+          highest_package: number | null
+          id: string
+          name: string
+          nirf_rank: number | null
+          placement_pct: number | null
+          state: string
+          website: string | null
+        }
+        Insert: {
+          avg_package?: number | null
+          branches?: Json
+          college_type?: string | null
+          created_at?: string
+          district: string
+          highest_package?: number | null
+          id?: string
+          name: string
+          nirf_rank?: number | null
+          placement_pct?: number | null
+          state: string
+          website?: string | null
+        }
+        Update: {
+          avg_package?: number | null
+          branches?: Json
+          college_type?: string | null
+          created_at?: string
+          district?: string
+          highest_package?: number | null
+          id?: string
+          name?: string
+          nirf_rank?: number | null
+          placement_pct?: number | null
+          state?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          location: string | null
+          mode: string | null
+          organizer: string | null
+          starts_at: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          location?: string | null
+          mode?: string | null
+          organizer?: string | null
+          starts_at: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          mode?: string | null
+          organizer?: string | null
+          starts_at?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          class_level: string | null
+          course: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          username: string
+        }
+        Insert: {
+          class_level?: string | null
+          course?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          username: string
+        }
+        Update: {
+          class_level?: string | null
+          course?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          class_level: string | null
+          created_at: string
+          id: string
+          score: number
+          topic: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          topic: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          class_level?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          topic?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          url: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      study_materials: {
+        Row: {
+          category: string
+          class_level: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          external_url: string | null
+          file_path: string | null
+          id: string
+          subject: string | null
+          title: string
+        }
+        Insert: {
+          category: string
+          class_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          subject?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          class_level?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          id?: string
+          subject?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          minutes: number
+          studied_on: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          minutes: number
+          studied_on?: string
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          minutes?: number
+          studied_on?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_tasks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          due_date: string | null
+          duration_min: number
+          id: string
+          subject: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          duration_min?: number
+          id?: string
+          subject?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          duration_min?: number
+          id?: string
+          subject?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +478,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

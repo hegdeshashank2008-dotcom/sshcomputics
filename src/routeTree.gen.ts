@@ -10,33 +10,147 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CollegesRouteImport } from './routes/colleges'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as MaterialsRouteImport } from './routes/materials'
+import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedTrackerRouteImport } from './routes/_authenticated/tracker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollegesRoute = CollegesRouteImport.update({
+  id: '/colleges',
+  path: '/colleges',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaterialsRoute = MaterialsRouteImport.update({
+  id: '/materials',
+  path: '/materials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTrackerRoute = AuthenticatedTrackerRouteImport.update({
+  id: '/tracker',
+  path: '/tracker',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/colleges': typeof CollegesRoute
+  '/events': typeof EventsRoute
+  '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
+  '/resources': typeof ResourcesRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/tracker': typeof AuthenticatedTrackerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/colleges': typeof CollegesRoute
+  '/events': typeof EventsRoute
+  '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
+  '/resources': typeof ResourcesRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/tracker': typeof AuthenticatedTrackerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/colleges': typeof CollegesRoute
+  '/events': typeof EventsRoute
+  '/materials': typeof MaterialsRoute
+  '/quiz': typeof QuizRoute
+  '/resources': typeof ResourcesRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/tracker': typeof AuthenticatedTrackerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/colleges'
+    | '/events'
+    | '/materials'
+    | '/quiz'
+    | '/resources'
+    | '/admin'
+    | '/tracker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/colleges'
+    | '/events'
+    | '/materials'
+    | '/quiz'
+    | '/resources'
+    | '/admin'
+    | '/tracker'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/colleges'
+    | '/events'
+    | '/materials'
+    | '/quiz'
+    | '/resources'
+    | '/_authenticated/admin'
+    | '/_authenticated/tracker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  CollegesRoute: typeof CollegesRoute
+  EventsRoute: typeof EventsRoute
+  MaterialsRoute: typeof MaterialsRoute
+  QuizRoute: typeof QuizRoute
+  ResourcesRoute: typeof ResourcesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +162,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colleges': {
+      id: '/colleges'
+      path: '/colleges'
+      fullPath: '/colleges'
+      preLoaderRoute: typeof CollegesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/materials': {
+      id: '/materials'
+      path: '/materials'
+      fullPath: '/materials'
+      preLoaderRoute: typeof MaterialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tracker': {
+      id: '/_authenticated/tracker'
+      path: '/tracker'
+      fullPath: '/tracker'
+      preLoaderRoute: typeof AuthenticatedTrackerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedTrackerRoute: typeof AuthenticatedTrackerRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedTrackerRoute: AuthenticatedTrackerRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  CollegesRoute: CollegesRoute,
+  EventsRoute: EventsRoute,
+  MaterialsRoute: MaterialsRoute,
+  QuizRoute: QuizRoute,
+  ResourcesRoute: ResourcesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
