@@ -35,14 +35,14 @@ function ResourcesPage() {
       const { data, error } = await supabase
         .from("resources")
         .select("*")
-        .order("resource_type", { ascending: true });
+        .order("category", { ascending: true });
       if (error) throw error;
       return data;
     },
   });
 
-  const types = Array.from(new Set(resources.map((r) => r.resource_type)));
-  const filtered = type ? resources.filter((r) => r.resource_type === type) : resources;
+  const types = Array.from(new Set(resources.map((r) => r.category)));
+  const filtered = type ? resources.filter((r) => r.category === type) : resources;
 
   return (
     <div className="section-shell pt-28 pb-24">
@@ -83,7 +83,7 @@ function ResourcesPage() {
         {isLoading && <p className="text-muted-foreground">Loading resources…</p>}
         {filtered.map((r) => (
           <article key={r.id} className="glass-card flex h-full flex-col p-6">
-            <p className="text-xs tracking-widest text-primary uppercase">{r.resource_type}</p>
+            <p className="text-xs tracking-widest text-primary uppercase">{r.category}</p>
             <h2 className="mt-2 text-lg font-semibold">{r.title}</h2>
             <p className="mt-3 flex-1 text-sm text-muted-foreground">{r.description}</p>
             <a href={r.url} target="_blank" rel="noopener noreferrer" className="mt-5">

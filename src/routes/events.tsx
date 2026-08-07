@@ -32,7 +32,7 @@ function EventsPage() {
       const { data, error } = await supabase
         .from("events")
         .select("*")
-        .order("start_date", { ascending: true });
+        .order("starts_at", { ascending: true });
       if (error) throw error;
       return data;
     },
@@ -68,25 +68,19 @@ function EventsPage() {
                   </span>
                   <h3 className="mt-4 text-lg font-semibold">{e.title}</h3>
                   <p className="mt-1 text-xs tracking-wider text-primary uppercase">
-                    {new Date(e.start_date).toLocaleDateString(undefined, {
+                    {new Date(e.starts_at).toLocaleDateString(undefined, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                     })}
-                    {e.end_date
-                      ? ` – ${new Date(e.end_date).toLocaleDateString(undefined, {
-                          day: "numeric",
-                          month: "short",
-                        })}`
-                      : ""}
                   </p>
                   <p className="mt-3 flex-1 text-sm text-muted-foreground">{e.description}</p>
                   <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" /> {e.location ?? "Online"} · {e.eligibility}
+                    <MapPin className="h-3.5 w-3.5" /> {e.location ?? "Online"} · {e.mode ?? "Online"} · {e.organizer ?? "Open"}
                   </p>
-                  {e.registration_url && (
+                  {e.url && (
                     <a
-                      href={e.registration_url}
+                      href={e.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-4"
