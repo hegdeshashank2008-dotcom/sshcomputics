@@ -1,62 +1,49 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, RefreshCw, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { generateQuiz } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 const CLASSES = [
   ...Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`),
+  "Coding — Beginner",
+  "Coding — Intermediate",
+  "Coding — Advanced",
+  "Coding — Interview prep",
   "Engineering",
-];
-
-/** Open Trivia DB categories, grouped as school-friendly topics. */
-const TOPICS = [
-  { label: "General Knowledge", category: 9 },
-  { label: "Science & Nature", category: 17 },
-  { label: "Computers & Coding", category: 18 },
-  { label: "Mathematics", category: 19 },
-  { label: "Mythology", category: 20 },
-  { label: "Sports", category: 21 },
-  { label: "Geography", category: 22 },
-  { label: "History", category: 23 },
-  { label: "Politics & Civics", category: 24 },
-  { label: "Art", category: 25 },
-  { label: "Animals", category: 27 },
-  { label: "Gadgets", category: 30 },
 ];
 
 type Question = {
   question: string;
-  correct_answer: string;
-  incorrect_answers: string[];
   options: string[];
+  correct_answer: string;
+  explanation?: string | undefined;
 };
 
-const decode = (s: string) => {
-  const el = typeof document !== "undefined" ? document.createElement("textarea") : null;
-  if (!el) return s;
-  el.innerHTML = s;
-  return el.value;
-};
-
-const shuffle = <T,>(arr: T[]) => arr.map((v) => [Math.random(), v] as const).sort((a, b) => a[0] - b[0]).map(([, v]) => v);
+const shuffle = <T,>(arr: T[]) =>
+  arr
+    .map((v) => [Math.random(), v] as const)
+    .sort((a, b) => a[0] - b[0])
+    .map(([, v]) => v);
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
     meta: [
-      { title: "Quiz Generator by Class, Topic & Lesson | Shashank Computics" },
+      { title: "Quiz Generator — Any Topic, Any Class | Shashank Computics" },
       {
         name: "description",
         content:
-          "Generate an instant practice quiz by choosing your class, topic, lesson and difficulty. Live questions, instant scoring and saved attempt history.",
+          "Type your lesson and topic and get an instant AI-generated practice quiz for any class, coding track or engineering subject, with instant scoring and saved attempts.",
       },
       { property: "og:title", content: "Instant Quiz Generator | Shashank Computics" },
       {
         property: "og:description",
-        content: "Practise with fresh questions tailored to your class, topic and difficulty level.",
+        content: "Write your own lesson and topic — get a fresh quiz generated on exactly that.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -67,9 +54,10 @@ export const Route = createFileRoute("/quiz")({
 
 function QuizPage() {
   const { user } = useAuth();
+  const runGenerate = useServerFn(generateQuiz);
   const [classLevel, setClassLevel] = useState("Class 10");
-  const [topic, setTopic] = useState(TOPICS[2]!.label);
   const [lesson, setLesson] = useState("");
+  const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("easy");
   const [count, setCount] = useState(10);
 
@@ -79,31 +67,21 @@ function QuizPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const generate = async () => {
+    if (!topic.trim()) {
+      toast.error("Please write the topic you want the quiz on.");
+      return;
+    }
     setLoading(true);
     setQuestions(null);
     setAnswers({});
     setSubmitted(false);
     try {
-      const cat = TOPICS.find((t) => t.label === topic)?.category ?? 9;
-      const res = await fetch(
-        `https://opentdb.com/api.php?amount=${count}&category=${cat}&difficulty=${difficulty}&type=multiple`,
-      );
-      const json = (await res.json()) as { response_code: number; results: Question[] };
-      if (json.response_code !== 0 || !json.results?.length) {
-        toast.error("Not enough questions for that combination — try another topic or difficulty.");
-        return;
-      }
-      setQuestions(
-        json.results.map((q) => ({
-          ...q,
-          question: decode(q.question),
-          correct_answer: decode(q.correct_answer),
-          incorrect_answers: q.incorrect_answers.map(decode),
-          options: shuffle([q.correct_answer, ...q.incorrect_answers].map(decode)),
-        })),
-      );
-    } catch {
-      toast.error("Could not reach the question bank. Please try again.");
+      const res = await runGenerate({
+        data: { topic, lesson, classLevel, difficulty, count },
+      });
+      setQuestions(res.questions.map((q) => ({ ...q, options: shuffle(q.options) })));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not generate the quiz.");
     } finally {
       setLoading(false);
     }
@@ -116,18 +94,13 @@ function QuizPage() {
   const submit = async () => {
     if (!questions) return;
     setSubmitted(true);
-    const total = questions.length;
-    const finalScore = questions.reduce(
-      (n, q, i) => (answers[i] === q.correct_answer ? n + 1 : n),
-      0,
-    );
     if (user) {
       await supabase.from("quiz_attempts").insert({
         user_id: user.id,
         class_level: classLevel,
-        topic: lesson.trim() ? `${topic} — ${lesson.trim()}` : topic,
-        score: finalScore,
-        total,
+        topic: lesson.trim() ? `${lesson.trim()} — ${topic.trim()}` : topic.trim(),
+        score,
+        total: questions.length,
       });
     }
   };
@@ -138,8 +111,8 @@ function QuizPage() {
         Quiz <span className="text-gradient">Generator</span>
       </h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
-        Choose your class, topic and lesson — we pull fresh questions from a live open question
-        bank and score you instantly. Signed-in students get their attempts saved to the tracker.
+        Pick your class or coding level, write your lesson and the exact topic you want — questions
+        are generated on that topic only. Signed-in students get attempts saved to the tracker.
       </p>
 
       <div className="glass-card mt-8 grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-5">
@@ -156,23 +129,20 @@ function QuizPage() {
           </select>
         </label>
         <label className="text-sm">
-          <span className="text-muted-foreground">Topic</span>
-          <select
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-foreground"
-          >
-            {TOPICS.map((t) => (
-              <option key={t.label}>{t.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="text-muted-foreground">Lesson (optional)</span>
+          <span className="text-muted-foreground">Lesson</span>
           <Input
             value={lesson}
             onChange={(e) => setLesson(e.target.value)}
-            placeholder="e.g. Loops"
+            placeholder="e.g. Chapter 4 — Arrays"
+            className="mt-1"
+          />
+        </label>
+        <label className="text-sm">
+          <span className="text-muted-foreground">Topic</span>
+          <Input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Write any topic…"
             className="mt-1"
           />
         </label>
@@ -243,6 +213,9 @@ function QuizPage() {
                   );
                 })}
               </div>
+              {submitted && q.explanation && (
+                <p className="mt-3 text-sm text-muted-foreground">{q.explanation}</p>
+              )}
             </article>
           ))}
 
