@@ -19,7 +19,7 @@ export type QuizQuestion = {
   question: string;
   options: string[];
   correct_answer: string;
-  explanation?: string;
+  explanation?: string | undefined;
 };
 
 export async function loadQuizSettings(): Promise<QuizSettings> {
