@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       college_feedback: {
         Row: {
           author_name: string
@@ -54,6 +72,7 @@ export type Database = {
       }
       colleges: {
         Row: {
+          approved: boolean
           avg_package: number | null
           branches: Json
           college_type: string | null
@@ -65,9 +84,12 @@ export type Database = {
           nirf_rank: number | null
           placement_pct: number | null
           state: string
+          submitted_by: string | null
+          updated_at: string
           website: string | null
         }
         Insert: {
+          approved?: boolean
           avg_package?: number | null
           branches?: Json
           college_type?: string | null
@@ -79,9 +101,12 @@ export type Database = {
           nirf_rank?: number | null
           placement_pct?: number | null
           state: string
+          submitted_by?: string | null
+          updated_at?: string
           website?: string | null
         }
         Update: {
+          approved?: boolean
           avg_package?: number | null
           branches?: Json
           college_type?: string | null
@@ -93,6 +118,8 @@ export type Database = {
           nirf_rank?: number | null
           placement_pct?: number | null
           state?: string
+          submitted_by?: string | null
+          updated_at?: string
           website?: string | null
         }
         Relationships: []
@@ -135,6 +162,62 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      material_sections: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      material_subjects: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          section_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          section_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          section_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_subjects_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "material_sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -220,6 +303,60 @@ export type Database = {
         }
         Relationships: []
       }
+      stay_reviews: {
+        Row: {
+          address: string | null
+          approved: boolean
+          author_name: string
+          city: string
+          comment: string | null
+          created_at: string
+          district: string
+          id: string
+          name: string
+          rating: number
+          rent_monthly: number | null
+          state: string
+          stay_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved?: boolean
+          author_name?: string
+          city: string
+          comment?: string | null
+          created_at?: string
+          district: string
+          id?: string
+          name: string
+          rating?: number
+          rent_monthly?: number | null
+          state: string
+          stay_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved?: boolean
+          author_name?: string
+          city?: string
+          comment?: string | null
+          created_at?: string
+          district?: string
+          id?: string
+          name?: string
+          rating?: number
+          rent_monthly?: number | null
+          state?: string
+          stay_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       study_materials: {
         Row: {
           category: string
@@ -230,8 +367,11 @@ export type Database = {
           external_url: string | null
           file_path: string | null
           id: string
+          section_id: string | null
           subject: string | null
+          subject_id: string | null
           title: string
+          updated_at: string
         }
         Insert: {
           category: string
@@ -242,8 +382,11 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          section_id?: string | null
           subject?: string | null
+          subject_id?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
           category?: string
@@ -254,10 +397,28 @@ export type Database = {
           external_url?: string | null
           file_path?: string | null
           id?: string
+          section_id?: string | null
           subject?: string | null
+          subject_id?: string | null
           title?: string
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "study_materials_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "material_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_materials_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "material_subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_sessions: {
         Row: {
