@@ -83,6 +83,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Shashank Computics" },
       { name: "twitter:card", content: "summary_large_image" },
+      { title: "Shashank Computics — Study Materials, Quizzes & Coding for Students" },
+      { property: "og:title", content: "Shashank Computics — Study Materials, Quizzes & Coding for Students" },
+      { name: "twitter:title", content: "Shashank Computics — Study Materials, Quizzes & Coding for Students" },
+      { name: "description", content: "Free study materials for Class 1-12, coding and engineering resources, a study tracker, quiz generator and engineering college placement data. Code. Create. Innovate." },
+      { property: "og:description", content: "Free study materials for Class 1-12, coding and engineering resources, a study tracker, quiz generator and engineering college placement data. Code. Create. Innovate." },
+      { name: "twitter:description", content: "Free study materials for Class 1-12, coding and engineering resources, a study tracker, quiz generator and engineering college placement data. Code. Create. Innovate." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62b20d9ec293fd2b9d305b048f444847/id-preview-f948159b--b788a246-cef4-4aec-9175-6307f565201a.lovable.app-1786458295003.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62b20d9ec293fd2b9d305b048f444847/id-preview-f948159b--b788a246-cef4-4aec-9175-6307f565201a.lovable.app-1786458295003.png" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       {

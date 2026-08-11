@@ -94,11 +94,11 @@ export const Route = createFileRoute("/")({
         content:
           "Free study materials for Class 1-12, coding and engineering resources, a study tracker, quiz generator and engineering college placement data. Code. Create. Innovate.",
       },
-      { property: "og:title", content: "Shashank Computics — Code. Create. Innovate." },
+      { property: "og:title", content: "Shashank Computics — Study Materials, Quizzes & Coding for Students" },
       {
         property: "og:description",
         content:
-          "Study materials, a personal study tracker, an instant quiz generator, college placement insight and coding resources for every student.",
+          "Free study materials for Class 1-12, coding and engineering resources, a study tracker, quiz generator and engineering college placement data. Code. Create. Innovate.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
