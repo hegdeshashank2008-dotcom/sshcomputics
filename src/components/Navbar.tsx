@@ -12,9 +12,11 @@ const LINKS = [
   { to: "/quiz", label: "Quiz" },
   { to: "/tracker", label: "Tracker" },
   { to: "/colleges", label: "Colleges" },
+  { to: "/stays", label: "Hostel & PG" },
   { to: "/events", label: "Events" },
   { to: "/resources", label: "Resources" },
 ] as const;
+
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -47,8 +49,16 @@ export function Navbar() {
           : "border-b border-transparent bg-transparent py-4",
       ].join(" ")}
     >
+      <div
+        aria-hidden
+        className={[
+          "nav-floating pointer-events-none absolute inset-0 -z-10 transition-opacity duration-500",
+          scrolled ? "opacity-100" : "opacity-60",
+        ].join(" ")}
+      />
       <nav className="section-shell flex items-center justify-between gap-4">
         <Link to="/" className="flex shrink-0 items-center gap-3">
+
           <img
             src={logo.url}
             alt="Shashank Computics logo"

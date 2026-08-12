@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Download, ExternalLink, FileText, Search } from "lucide-react";
+import { Download, ExternalLink, FileText, Pencil, Save, Search, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-
-const CLASSES = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
 export const Route = createFileRoute("/materials")({
   head: () => ({
@@ -17,12 +16,12 @@ export const Route = createFileRoute("/materials")({
       {
         name: "description",
         content:
-          "Browse free study materials organised by class 1-12, coding tracks and engineering subjects. Notes, textbooks and files published by Shashank Computics.",
+          "Browse free study materials by class 1-12 sections, coding languages and engineering branches. Notes, textbooks and files published by Shashank Computics.",
       },
       { property: "og:title", content: "Study Materials | Shashank Computics" },
       {
         property: "og:description",
-        content: "Class-wise school notes, coding tracks and engineering study material, all free.",
+        content: "Class-wise school notes, coding languages and engineering branch material, all free.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -33,11 +32,47 @@ export const Route = createFileRoute("/materials")({
 
 type Category = "school" | "coding" | "engineering";
 
+const CATEGORY_LABEL: Record<Category, string> = {
+  school: "Class 1 – 12",
+  coding: "Coding",
+  engineering: "Engineering",
+};
+
 function MaterialsPage() {
   const [category, setCategory] = useState<Category>("school");
-  const [classLevel, setClassLevel] = useState<string>("");
+  const [sectionId, setSectionId] = useState<string>("");
+  const [subjectId, setSubjectId] = useState<string>("");
   const [search, setSearch] = useState("");
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const qc = useQueryClient();
+
+  const { data: sections = [] } = useQuery({
+    queryKey: ["material_sections", category],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("material_sections")
+        .select("*")
+        .eq("category", category)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: subjects = [] } = useQuery({
+    queryKey: ["material_subjects", sectionId],
+    queryFn: async () => {
+      if (!sectionId) return [];
+      const { data, error } = await supabase
+        .from("material_subjects")
+        .select("*")
+        .eq("section_id", sectionId)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(sectionId),
+  });
 
   const { data: materials = [], isLoading } = useQuery({
     queryKey: ["materials", category],
@@ -53,27 +88,43 @@ function MaterialsPage() {
   });
 
   const filtered = materials.filter((m) => {
-    const matchesClass = !classLevel || m.class_level === classLevel;
+    const matchesSection = !sectionId || m.section_id === sectionId;
+    const matchesSubject = !subjectId || m.subject_id === subjectId;
     const q = search.trim().toLowerCase();
     const matchesSearch =
       !q ||
       m.title.toLowerCase().includes(q) ||
       (m.subject ?? "").toLowerCase().includes(q) ||
       (m.description ?? "").toLowerCase().includes(q);
-    return matchesClass && matchesSearch;
+    return matchesSection && matchesSubject && matchesSearch;
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("study_materials").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Material deleted.");
+      qc.invalidateQueries({ queryKey: ["materials", category] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const openFile = async (path: string) => {
     if (!user) {
-      toast.error("Please sign in to download files.");
+      toast.error("Please sign in to open files.");
       return;
     }
-    const { data, error } = await supabase.storage.from("materials").createSignedUrl(path, 120);
+    const tab = window.open("", "_blank", "noopener");
+    const { data, error } = await supabase.storage.from("materials").createSignedUrl(path, 300);
     if (error || !data) {
+      tab?.close();
       toast.error("Could not open that file.");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener");
+    if (tab) tab.location.href = data.signedUrl;
+    else window.open(data.signedUrl, "_blank", "noopener");
   };
 
   return (
@@ -82,24 +133,19 @@ function MaterialsPage() {
         Study <span className="text-gradient">Materials</span>
       </h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
-        Everything here is published by the Shashank Computics admin team. Pick your track, then
-        narrow by class or search a subject.
+        Pick your track, then narrow by section — class, coding language or engineering branch — and
+        by subject. Every document opens in a new page.
       </p>
 
       <div className="mt-8 flex flex-wrap gap-2">
-        {(
-          [
-            ["school", "Class 1 – 12"],
-            ["coding", "Coding"],
-            ["engineering", "Engineering"],
-          ] as const
-        ).map(([key, label]) => (
+        {(Object.keys(CATEGORY_LABEL) as Category[]).map((key) => (
           <button
             key={key}
             type="button"
             onClick={() => {
               setCategory(key);
-              setClassLevel("");
+              setSectionId("");
+              setSubjectId("");
             }}
             className={[
               "rounded-full border px-5 py-2 text-sm font-medium transition-all",
@@ -108,38 +154,74 @@ function MaterialsPage() {
                 : "border-border bg-surface text-muted-foreground hover:border-primary/40 hover:text-foreground",
             ].join(" ")}
           >
-            {label}
+            {CATEGORY_LABEL[key]}
           </button>
         ))}
       </div>
 
-      {category === "school" && (
-        <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setSectionId("");
+            setSubjectId("");
+          }}
+          className={[
+            "rounded-lg border px-3 py-1.5 text-xs transition-colors",
+            sectionId === ""
+              ? "border-primary/60 text-primary"
+              : "border-border text-muted-foreground hover:text-foreground",
+          ].join(" ")}
+        >
+          All sections
+        </button>
+        {sections.map((s) => (
           <button
+            key={s.id}
             type="button"
-            onClick={() => setClassLevel("")}
+            onClick={() => {
+              setSectionId(s.id);
+              setSubjectId("");
+            }}
             className={[
               "rounded-lg border px-3 py-1.5 text-xs transition-colors",
-              classLevel === ""
+              sectionId === s.id
                 ? "border-primary/60 text-primary"
                 : "border-border text-muted-foreground hover:text-foreground",
             ].join(" ")}
           >
-            All classes
+            {s.name}
           </button>
-          {CLASSES.map((c) => (
+        ))}
+      </div>
+
+      {sectionId && subjects.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setSubjectId("")}
+            className={[
+              "rounded-lg border px-3 py-1.5 text-xs transition-colors",
+              subjectId === ""
+                ? "border-violet/60 text-violet"
+                : "border-border text-muted-foreground hover:text-foreground",
+            ].join(" ")}
+          >
+            All subjects
+          </button>
+          {subjects.map((s) => (
             <button
-              key={c}
+              key={s.id}
               type="button"
-              onClick={() => setClassLevel(c)}
+              onClick={() => setSubjectId(s.id)}
               className={[
                 "rounded-lg border px-3 py-1.5 text-xs transition-colors",
-                classLevel === c
-                  ? "border-primary/60 text-primary"
+                subjectId === s.id
+                  ? "border-violet/60 text-violet"
                   : "border-border text-muted-foreground hover:text-foreground",
               ].join(" ")}
             >
-              Class {c}
+              {s.name}
             </button>
           ))}
         </div>
@@ -161,34 +243,148 @@ function MaterialsPage() {
           <p className="text-muted-foreground">No materials here yet — check back soon.</p>
         )}
         {filtered.map((m) => (
-          <article key={m.id} className="glass-card flex h-full flex-col p-6">
-            <span className="inline-flex w-fit rounded-lg bg-primary/15 p-2.5 text-primary">
-              <FileText className="h-4 w-4" />
-            </span>
-            <h2 className="mt-4 text-lg font-semibold">{m.title}</h2>
-            <p className="mt-1 text-xs tracking-wider text-primary uppercase">
-              {[m.class_level ? `Class ${m.class_level}` : null, m.subject]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-            <p className="mt-3 flex-1 text-sm text-muted-foreground">{m.description}</p>
-            <div className="mt-5 flex gap-2">
-              {m.file_path && (
-                <Button size="sm" onClick={() => openFile(m.file_path!)} className="gap-1.5">
-                  <Download className="h-4 w-4" /> Download
-                </Button>
-              )}
-              {m.external_url && (
-                <a href={m.external_url} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="gap-1.5">
-                    <ExternalLink className="h-4 w-4" /> Open
-                  </Button>
-                </a>
-              )}
-            </div>
-          </article>
+          <MaterialCard
+            key={m.id}
+            material={m}
+            isAdmin={isAdmin}
+            onOpenFile={openFile}
+            onDelete={() => remove.mutate(m.id)}
+            onSaved={() => qc.invalidateQueries({ queryKey: ["materials", category] })}
+          />
         ))}
       </div>
     </div>
+  );
+}
+
+type Material = {
+  id: string;
+  title: string;
+  description: string | null;
+  class_level: string | null;
+  subject: string | null;
+  file_path: string | null;
+  external_url: string | null;
+};
+
+function MaterialCard({
+  material,
+  isAdmin,
+  onOpenFile,
+  onDelete,
+  onSaved,
+}: {
+  material: Material;
+  isAdmin: boolean;
+  onOpenFile: (path: string) => void;
+  onDelete: () => void;
+  onSaved: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({
+    title: material.title,
+    description: material.description ?? "",
+    subject: material.subject ?? "",
+    external_url: material.external_url ?? "",
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("study_materials")
+        .update({
+          title: draft.title.trim(),
+          description: draft.description.trim() || null,
+          subject: draft.subject.trim() || null,
+          external_url: draft.external_url.trim() || null,
+        })
+        .eq("id", material.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setEditing(false);
+      toast.success("Material updated.");
+      onSaved();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <article className="glass-card flex h-full flex-col p-6">
+      <span className="inline-flex w-fit rounded-lg bg-primary/15 p-2.5 text-primary">
+        <FileText className="h-4 w-4" />
+      </span>
+
+      {editing ? (
+        <div className="mt-4 space-y-2">
+          <Input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
+          <Input
+            value={draft.subject}
+            onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
+            placeholder="Subject"
+          />
+          <Input
+            value={draft.external_url}
+            onChange={(e) => setDraft({ ...draft, external_url: e.target.value })}
+            placeholder="External link"
+          />
+          <Textarea
+            value={draft.description}
+            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            rows={3}
+          />
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending} className="gap-1.5">
+              <Save className="h-4 w-4" /> Save
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)} className="gap-1.5">
+              <X className="h-4 w-4" /> Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2 className="mt-4 text-lg font-semibold">{material.title}</h2>
+          <p className="mt-1 text-xs tracking-wider text-primary uppercase">
+            {[material.class_level ? `Class ${material.class_level}` : null, material.subject]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          <p className="mt-3 flex-1 text-sm text-muted-foreground">{material.description}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {material.file_path && (
+              <Button size="sm" onClick={() => onOpenFile(material.file_path!)} className="gap-1.5">
+                <Download className="h-4 w-4" /> Open document
+              </Button>
+            )}
+            {material.external_url && (
+              <a href={material.external_url} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline" className="gap-1.5">
+                  <ExternalLink className="h-4 w-4" /> Open link
+                </Button>
+              </a>
+            )}
+          </div>
+          {isAdmin && (
+            <div className="mt-4 flex gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-1.5 hover:text-primary"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="flex items-center gap-1.5 hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </article>
   );
 }

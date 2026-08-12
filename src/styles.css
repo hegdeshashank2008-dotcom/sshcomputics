@@ -310,7 +310,33 @@
     hue-cycle 34s linear infinite;
 }
 
+@keyframes nav-hue {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@utility nav-floating {
+  background-image: linear-gradient(
+    100deg,
+    oklch(0.78 0.14 205 / 22%),
+    oklch(0.68 0.18 292 / 22%),
+    oklch(0.74 0.15 160 / 22%),
+    oklch(0.7 0.17 340 / 22%),
+    oklch(0.78 0.14 205 / 22%)
+  );
+  background-size: 320% 100%;
+  animation: nav-hue 18s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
