@@ -131,9 +131,40 @@ function RootComponent() {
       <Navbar />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Shashank Computics · Code · Create · Innovate
+      <footer id="connect" className="border-t border-border py-12">
+        <div className="section-shell text-center">
+          <h2 className="text-2xl font-semibold">
+            Connect with <span className="text-gradient">Shashank Computics</span>
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Follow along for new material drops, coding tips and contest alerts.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {[
+              { label: "Instagram", href: "https://instagram.com/shashank_computics" },
+              { label: "YouTube", href: "https://youtube.com/@shashank_computics" },
+              {
+                label: "LinkedIn",
+                href: "https://www.linkedin.com/in/shashank-hegde-039748400",
+              },
+            ].map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-border bg-surface px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+          <p className="mt-8 text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Shashank Computics · Code · Create · Innovate
+          </p>
+        </div>
       </footer>
+
       <Toaster />
     </QueryClientProvider>
   );
