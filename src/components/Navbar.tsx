@@ -12,9 +12,11 @@ const LINKS = [
   { to: "/quiz", label: "Quiz" },
   { to: "/tracker", label: "Tracker" },
   { to: "/colleges", label: "Colleges" },
+  { to: "/stays", label: "Hostel & PG" },
   { to: "/events", label: "Events" },
   { to: "/resources", label: "Resources" },
 ] as const;
+
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
