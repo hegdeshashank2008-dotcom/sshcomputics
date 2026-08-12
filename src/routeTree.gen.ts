@@ -17,6 +17,7 @@ import { Route as EventsRouteImport } from './routes/events'
 import { Route as MaterialsRouteImport } from './routes/materials'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as StaysRouteImport } from './routes/stays'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedTrackerRouteImport } from './routes/_authenticated/tracker'
 
@@ -59,6 +60,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
   path: '/resources',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaysRoute = StaysRouteImport.update({
+  id: '/stays',
+  path: '/stays',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/materials': typeof MaterialsRoute
   '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
+  '/stays': typeof StaysRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/tracker': typeof AuthenticatedTrackerRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/materials': typeof MaterialsRoute
   '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
+  '/stays': typeof StaysRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/tracker': typeof AuthenticatedTrackerRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/materials': typeof MaterialsRoute
   '/quiz': typeof QuizRoute
   '/resources': typeof ResourcesRoute
+  '/stays': typeof StaysRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/tracker': typeof AuthenticatedTrackerRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/materials'
     | '/quiz'
     | '/resources'
+    | '/stays'
     | '/admin'
     | '/tracker'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/materials'
     | '/quiz'
     | '/resources'
+    | '/stays'
     | '/admin'
     | '/tracker'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/materials'
     | '/quiz'
     | '/resources'
+    | '/stays'
     | '/_authenticated/admin'
     | '/_authenticated/tracker'
   fileRoutesById: FileRoutesById
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   MaterialsRoute: typeof MaterialsRoute
   QuizRoute: typeof QuizRoute
   ResourcesRoute: typeof ResourcesRoute
+  StaysRoute: typeof StaysRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stays': {
+      id: '/stays'
+      path: '/stays'
+      fullPath: '/stays'
+      preLoaderRoute: typeof StaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaterialsRoute: MaterialsRoute,
   QuizRoute: QuizRoute,
   ResourcesRoute: ResourcesRoute,
+  StaysRoute: StaysRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
