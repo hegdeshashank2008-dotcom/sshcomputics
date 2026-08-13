@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { CheckCircle2, Circle, Clock, Plus, Trash2, Trophy } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Circle, Clock, Plus, Trash2, Trophy, Maximize2, Play, Pause, RotateCcw, Quote, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -163,6 +163,19 @@ function TrackerPage() {
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section className="glass-card p-6">
           <h2 className="text-xl font-semibold">Study plan</h2>
+          <MotivationQuote />
+          <StudyTimer
+            onLog={(mins) => {
+              if (!user) return;
+              void supabase
+                .from("study_sessions")
+                .insert({ user_id: user.id, subject: "Focus session", minutes: mins })
+                .then(() => {
+                  toast.success(`${mins} focused minutes logged.`);
+                  qc.invalidateQueries({ queryKey: ["study_sessions"] });
+                });
+            }}
+          />
           <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" />
             <Input
@@ -265,6 +278,142 @@ function TrackerPage() {
           </ul>
         </section>
       </div>
+    </div>
+  );
+}
+
+const QUOTES = [
+  "Small daily progress beats rare bursts of brilliance.",
+  "Discipline is choosing what you want most over what you want now.",
+  "You don't have to be extreme, just consistent.",
+  "One focused hour is worth five distracted ones.",
+  "Every expert was once a beginner who refused to quit.",
+  "Study until your signature becomes an autograph.",
+  "The pain of discipline weighs ounces; regret weighs tons.",
+];
+
+function MotivationQuote() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setI((n) => (n + 1) % QUOTES.length), 8000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <p className="mt-4 flex items-start gap-2 rounded-xl border border-border bg-surface p-4 text-sm text-muted-foreground">
+      <Quote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+      <span>{QUOTES[i]}</span>
+    </p>
+  );
+}
+
+function StudyTimer({ onLog }: { onLog: (minutes: number) => void }) {
+  const [target, setTarget] = useState(25);
+  const [left, setLeft] = useState(25 * 60);
+  const [running, setRunning] = useState(false);
+  const [full, setFull] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const logged = useRef(false);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  useEffect(() => {
+    if (left === 0 && running) {
+      setRunning(false);
+      if (!logged.current) {
+        logged.current = true;
+        onLog(target);
+      }
+    }
+  }, [left, running, target, onLog]);
+
+  useEffect(() => {
+    const onChange = () => setFull(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const start = async () => {
+    logged.current = false;
+    setRunning(true);
+    try {
+      if (wrapRef.current && !document.fullscreenElement) await wrapRef.current.requestFullscreen();
+    } catch {
+      /* fullscreen may be blocked; timer still runs */
+    }
+  };
+
+  const reset = () => {
+    setRunning(false);
+    setLeft(target * 60);
+    logged.current = false;
+  };
+
+  const exit = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+  };
+
+  const mm = String(Math.floor(left / 60)).padStart(2, "0");
+  const ss = String(left % 60).padStart(2, "0");
+
+  return (
+    <div
+      ref={wrapRef}
+      className={
+        full
+          ? "flex h-screen w-screen flex-col items-center justify-center gap-8 bg-background"
+          : "mt-4 rounded-xl border border-border bg-surface p-4"
+      }
+    >
+      {full && <p className="text-sm tracking-widest text-muted-foreground uppercase">Focus mode</p>}
+      <p
+        className={
+          full
+            ? "text-[22vw] leading-none font-bold text-gradient"
+            : "text-4xl font-bold text-primary"
+        }
+      >
+        {mm}:{ss}
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {!full && (
+          <Input
+            type="number"
+            value={target}
+            onChange={(e) => {
+              const v = Math.max(1, Number(e.target.value));
+              setTarget(v);
+              if (!running) setLeft(v * 60);
+            }}
+            className="w-20"
+          />
+        )}
+        <Button size="sm" className="gap-1.5" onClick={() => (running ? setRunning(false) : void start())}>
+          {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {running ? "Pause" : "Start focus"}
+        </Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={reset}>
+          <RotateCcw className="h-4 w-4" /> Reset
+        </Button>
+        {full ? (
+          <Button size="sm" variant="ghost" className="gap-1.5" onClick={exit}>
+            <X className="h-4 w-4" /> Exit
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+            onClick={() => wrapRef.current?.requestFullscreen()}
+          >
+            <Maximize2 className="h-4 w-4" /> Full screen
+          </Button>
+        )}
+      </div>
+      {full && <MotivationQuote />}
     </div>
   );
 }

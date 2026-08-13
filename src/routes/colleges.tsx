@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Building2, Star, Globe } from "lucide-react";
+import { Building2, Star, Globe, Pencil, Trash2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
@@ -29,12 +30,64 @@ export const Route = createFileRoute("/colleges")({
   component: CollegesPage,
 });
 
-type Branch = { branch: string; placement_pct?: number; avg_package?: number };
+type Branch = { branch: string; placement_pct?: number | undefined; avg_package?: number | undefined };
+
+type CollegeForm = {
+  id?: string;
+  name: string;
+  state: string;
+  district: string;
+  college_type: string;
+  nirf_rank: string;
+  website: string;
+  avg_package: string;
+  highest_package: string;
+  placement_pct: string;
+  branches: string;
+};
+
+const emptyForm: CollegeForm = {
+  name: "",
+  state: "",
+  district: "",
+  college_type: "",
+  nirf_rank: "",
+  website: "",
+  avg_package: "",
+  highest_package: "",
+  placement_pct: "",
+  branches: "",
+};
+
+const num = (v: string) => (v.trim() === "" ? null : Number(v));
+
+function parseBranches(text: string): Branch[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [branch, pct, avg] = line.split(",").map((p) => p?.trim() ?? "");
+      return {
+        branch: branch ?? "",
+        placement_pct: pct ? Number(pct) : undefined,
+        avg_package: avg ? Number(avg) : undefined,
+      };
+    })
+    .filter((b) => b.branch);
+}
+
+function branchesToText(branches: Branch[]) {
+  return branches.map((b) => [b.branch, b.placement_pct ?? "", b.avg_package ?? ""].join(", ")).join("\n");
+}
 
 function CollegesPage() {
+  const { user, isAdmin } = useAuth();
+  const qc = useQueryClient();
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [form, setForm] = useState<CollegeForm | null>(null);
 
   const { data: colleges = [], isLoading } = useQuery({
     queryKey: ["colleges"],
@@ -46,6 +99,52 @@ function CollegesPage() {
       if (error) throw error;
       return data;
     },
+  });
+
+  const save = useMutation({
+    mutationFn: async (f: CollegeForm) => {
+      if (!user) throw new Error("Sign in first.");
+      if (!f.name.trim() || !f.state.trim() || !f.district.trim())
+        throw new Error("Name, state and district are required.");
+      const payload = {
+        name: f.name.trim(),
+        state: f.state.trim(),
+        district: f.district.trim(),
+        college_type: f.college_type.trim() || null,
+        nirf_rank: num(f.nirf_rank),
+        website: f.website.trim() || null,
+        avg_package: num(f.avg_package),
+        highest_package: num(f.highest_package),
+        placement_pct: num(f.placement_pct),
+        branches: parseBranches(f.branches) as unknown as never,
+      };
+      if (f.id) {
+        const { error } = await supabase.from("colleges").update(payload).eq("id", f.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("colleges").insert({
+          ...payload,
+          approved: isAdmin,
+          submitted_by: user.id,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(isAdmin ? "College saved." : "Submitted for admin approval.");
+      setForm(null);
+      qc.invalidateQueries({ queryKey: ["colleges"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("colleges").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["colleges"] }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const states = Array.from(new Set(colleges.map((c) => c.state))).sort();
@@ -67,7 +166,7 @@ function CollegesPage() {
         students actually say about it.
       </p>
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-8 flex flex-wrap items-center gap-3">
         <select
           value={state}
           onChange={(e) => {
@@ -95,7 +194,46 @@ function CollegesPage() {
             </option>
           ))}
         </select>
+        {user && (
+          <Button size="sm" className="gap-1.5" onClick={() => setForm({ ...emptyForm })}>
+            <Plus className="h-4 w-4" /> {isAdmin ? "Add college" : "Suggest a college"}
+          </Button>
+        )}
       </div>
+
+      {form && (
+        <section className="glass-card mt-6 grid gap-3 p-6 md:grid-cols-3">
+          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="College name" />
+          <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} placeholder="State" />
+          <Input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="District" />
+          <Input value={form.college_type} onChange={(e) => setForm({ ...form, college_type: e.target.value })} placeholder="Type (Government / Private)" />
+          <Input value={form.nirf_rank} onChange={(e) => setForm({ ...form, nirf_rank: e.target.value })} placeholder="NIRF rank" />
+          <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website" />
+          <Input value={form.placement_pct} onChange={(e) => setForm({ ...form, placement_pct: e.target.value })} placeholder="Placement %" />
+          <Input value={form.avg_package} onChange={(e) => setForm({ ...form, avg_package: e.target.value })} placeholder="Avg package (LPA)" />
+          <Input value={form.highest_package} onChange={(e) => setForm({ ...form, highest_package: e.target.value })} placeholder="Highest package (LPA)" />
+          <Textarea
+            value={form.branches}
+            onChange={(e) => setForm({ ...form, branches: e.target.value })}
+            placeholder={"Branches, one per line: CSE, 95, 18"}
+            rows={4}
+            className="md:col-span-3"
+          />
+          <div className="flex gap-2 md:col-span-3">
+            <Button size="sm" onClick={() => save.mutate(form)} disabled={save.isPending}>
+              {form.id ? "Update college" : isAdmin ? "Add college" : "Submit for approval"}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setForm(null)}>
+              Cancel
+            </Button>
+          </div>
+          {!isAdmin && (
+            <p className="text-xs text-muted-foreground md:col-span-3">
+              Student submissions go live after admin approval.
+            </p>
+          )}
+        </section>
+      )}
 
       {isLoading && <p className="mt-10 text-muted-foreground">Loading colleges…</p>}
 
@@ -114,12 +252,46 @@ function CollegesPage() {
                   <p className="mt-1 text-xs tracking-wider text-primary uppercase">
                     {c.district}, {c.state} · {c.college_type}
                   </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Last updated {new Date(c.updated_at).toLocaleDateString()}
+                    {!c.approved && " · pending approval"}
+                  </p>
                 </div>
-                {c.nirf_rank && (
-                  <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                    NIRF #{c.nirf_rank}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {c.nirf_rank && (
+                    <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+                      NIRF #{c.nirf_rank}
+                    </span>
+                  )}
+                  {isAdmin && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Edit college"
+                        onClick={() =>
+                          setForm({
+                            id: c.id,
+                            name: c.name,
+                            state: c.state,
+                            district: c.district,
+                            college_type: c.college_type ?? "",
+                            nirf_rank: c.nirf_rank?.toString() ?? "",
+                            website: c.website ?? "",
+                            avg_package: c.avg_package?.toString() ?? "",
+                            highest_package: c.highest_package?.toString() ?? "",
+                            placement_pct: c.placement_pct?.toString() ?? "",
+                            branches: branchesToText(branches),
+                          })
+                        }
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                      </button>
+                      <button type="button" aria-label="Delete college" onClick={() => remove.mutate(c.id)}>
+                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               <dl className="mt-5 grid grid-cols-3 gap-3 text-center">
