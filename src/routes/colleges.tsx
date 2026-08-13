@@ -30,7 +30,7 @@ export const Route = createFileRoute("/colleges")({
   component: CollegesPage,
 });
 
-type Branch = { branch: string; placement_pct?: number; avg_package?: number };
+type Branch = { branch: string; placement_pct?: number | undefined; avg_package?: number | undefined };
 
 type CollegeForm = {
   id?: string;
