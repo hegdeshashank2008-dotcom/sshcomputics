@@ -163,6 +163,19 @@ function TrackerPage() {
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <section className="glass-card p-6">
           <h2 className="text-xl font-semibold">Study plan</h2>
+          <MotivationQuote />
+          <StudyTimer
+            onLog={(mins) => {
+              if (!user) return;
+              void supabase
+                .from("study_sessions")
+                .insert({ user_id: user.id, subject: "Focus session", minutes: mins })
+                .then(() => {
+                  toast.success(`${mins} focused minutes logged.`);
+                  qc.invalidateQueries({ queryKey: ["study_sessions"] });
+                });
+            }}
+          />
           <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" />
             <Input
