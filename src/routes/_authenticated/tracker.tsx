@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { CheckCircle2, Circle, Clock, Plus, Trash2, Trophy } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Circle, Clock, Plus, Trash2, Trophy, Maximize2, Play, Pause, RotateCcw, Quote, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
