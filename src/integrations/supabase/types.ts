@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      animation_videos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          external_url: string | null
+          id: string
+          source: string
+          status: string
+          storage_path: string | null
+          title: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          source?: string
+          status?: string
+          storage_path?: string | null
+          title: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          source?: string
+          status?: string
+          storage_path?: string | null
+          title?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
