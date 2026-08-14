@@ -10,6 +10,7 @@ const LINKS = [
   { to: "/", label: "Home" },
   { to: "/materials", label: "Study Materials" },
   { to: "/quiz", label: "Quiz" },
+  { to: "/animations", label: "Animations" },
   { to: "/tracker", label: "Tracker" },
   { to: "/colleges", label: "Colleges" },
   { to: "/stays", label: "Hostel & PG" },
