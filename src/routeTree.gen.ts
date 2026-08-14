@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AnimationsRouteImport } from './routes/animations'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CollegesRouteImport } from './routes/colleges'
 import { Route as EventsRouteImport } from './routes/events'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnimationsRoute = AnimationsRouteImport.update({
+  id: '/animations',
+  path: '/animations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -78,6 +84,7 @@ const AuthenticatedTrackerRoute = AuthenticatedTrackerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/animations': typeof AnimationsRoute
   '/auth': typeof AuthRoute
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/animations': typeof AnimationsRoute
   '/auth': typeof AuthRoute
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/animations': typeof AnimationsRoute
   '/auth': typeof AuthRoute
   '/colleges': typeof CollegesRoute
   '/events': typeof EventsRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/animations'
     | '/auth'
     | '/colleges'
     | '/events'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/animations'
     | '/auth'
     | '/colleges'
     | '/events'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/animations'
     | '/auth'
     | '/colleges'
     | '/events'
@@ -157,6 +169,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AnimationsRoute: typeof AnimationsRoute
   AuthRoute: typeof AuthRoute
   CollegesRoute: typeof CollegesRoute
   EventsRoute: typeof EventsRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/animations': {
+      id: '/animations'
+      path: '/animations'
+      fullPath: '/animations'
+      preLoaderRoute: typeof AnimationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -264,6 +284,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AnimationsRoute: AnimationsRoute,
   AuthRoute: AuthRoute,
   CollegesRoute: CollegesRoute,
   EventsRoute: EventsRoute,
