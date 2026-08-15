@@ -61,7 +61,7 @@ export function Navbar() {
         <Link to="/" className="flex shrink-0 items-center gap-3">
 
           <img
-            src={logo.url}
+            src={logo}
             alt="Shashank Computics logo"
             className={[
               "w-auto transition-all duration-500",
