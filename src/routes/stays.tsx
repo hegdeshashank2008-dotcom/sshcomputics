@@ -42,6 +42,23 @@ const EMPTY = {
   comment: "",
 };
 
+type StayRow = {
+  id: string;
+  user_id?: string | null;
+  stay_type: string;
+  name: string;
+  state: string;
+  district: string;
+  city: string;
+  address: string | null;
+  rent_monthly: number | null;
+  rating: number;
+  author_name: string;
+  comment: string | null;
+  approved: boolean;
+  created_at: string;
+};
+
 function StaysPage() {
   const { user, username, isAdmin } = useAuth();
   const qc = useQueryClient();
