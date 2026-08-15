@@ -65,7 +65,7 @@ export function Navbar() {
             alt="Shashank Computics logo"
             className={[
               "w-auto transition-all duration-500",
-              scrolled ? "h-9" : "h-12",
+              scrolled ? "h-14" : "h-16",
             ].join(" ")}
           />
           <span className="sr-only">Shashank Computics</span>
