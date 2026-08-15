@@ -118,15 +118,30 @@ function MaterialsPage() {
       return;
     }
     const tab = window.open("", "_blank", "noopener");
-    const { data, error } = await supabase.storage.from("materials").createSignedUrl(path, 300);
-    if (error || !data) {
-      tab?.close();
+    const openMaterial = async (path: string) => {
+  if (!user) {
+    toast.error("Please sign in to open files.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.storage
+      .from("materials")
+      .createSignedUrl(path, 300);
+
+    if (error || !data?.signedUrl) {
+      console.error("Error creating signed URL:", error);
       toast.error("Could not open that file.");
       return;
     }
-    if (tab) tab.location.href = data.signedUrl;
-    else window.open(data.signedUrl, "_blank", "noopener");
-  };
+
+    // Open the PDF directly
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    console.error("Error opening material:", error);
+    toast.error("Could not open that file.");
+  }
+};
 
   return (
     <div className="section-shell pt-28 pb-24">
