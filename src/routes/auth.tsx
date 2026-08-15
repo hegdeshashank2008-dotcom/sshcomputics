@@ -145,21 +145,61 @@ function AuthPage() {
                   className="mt-1"
                 />
               </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">School / college studying in</span>
+                <Input
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
+                  placeholder="e.g. Govt. PU College, Sirsi"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Current occupation</span>
+                <Input
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value)}
+                  placeholder="e.g. Student, Working professional"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Email ID</span>
+                <Input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="mt-1"
+                />
+              </label>
             </>
           )}
 
           <label className="block text-sm">
             <span className="text-muted-foreground">Password</span>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </label>
+
 
           <label className="block text-sm">
             <span className="text-muted-foreground">
