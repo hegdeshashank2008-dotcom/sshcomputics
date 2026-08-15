@@ -197,6 +197,38 @@ function AnimationsPage() {
         </section>
       )}
 
+      {topic.trim().length >= 3 && (
+        <section className="glass-card mt-6 p-6">
+          <h2 className="text-lg font-semibold">Free animated lessons on “{topic.trim()}”</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Hand-picked animation sources — each opens in a new page.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[
+              {
+                label: "YouTube animations",
+                href: `https://www.youtube.com/results?search_query=${encodeURIComponent(`${topic} 3d animation explained ${level}`)}`,
+              },
+              {
+                label: "Khan Academy",
+                href: `https://www.khanacademy.org/search?page_search_query=${encodeURIComponent(topic)}`,
+              },
+              {
+                label: "PhET simulations",
+                href: `https://phet.colorado.edu/en/simulations/filter?q=${encodeURIComponent(topic)}`,
+              },
+            ].map((l) => (
+              <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  {l.label} <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+
       <div className="mt-8">
         <Rotatable3D topic={topic} />
       </div>

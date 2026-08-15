@@ -266,24 +266,33 @@ export type Database = {
           class_level: string | null
           course: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          occupation: string | null
+          school: string | null
           username: string
         }
         Insert: {
           class_level?: string | null
           course?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
+          occupation?: string | null
+          school?: string | null
           username: string
         }
         Update: {
           class_level?: string | null
           course?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          occupation?: string | null
+          school?: string | null
           username?: string
         }
         Relationships: []

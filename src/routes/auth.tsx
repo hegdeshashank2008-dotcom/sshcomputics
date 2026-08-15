@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usernameToEmail } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -39,8 +40,12 @@ function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [classLevel, setClassLevel] = useState("");
+  const [school, setSchool] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [captcha, setCaptcha] = useState(newCaptcha);
   const [captchaInput, setCaptchaInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -57,15 +62,35 @@ function AuthPage() {
     const email = usernameToEmail(username);
     try {
       if (mode === "register") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { username: username.trim(), full_name: fullName, class_level: classLevel },
+            data: {
+              username: username.trim(),
+              full_name: fullName,
+              class_level: classLevel,
+              school,
+              occupation,
+              email: contactEmail,
+            },
           },
         });
         if (error) throw error;
+        const newUser = data.user;
+        if (newUser) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: newUser.id,
+            username: username.trim(),
+            full_name: fullName.trim() || null,
+            class_level: classLevel.trim() || null,
+            school: school.trim() || null,
+            occupation: occupation.trim() || null,
+            email: contactEmail.trim() || null,
+          });
+          if (profileError) console.error(profileError);
+        }
         toast.success("Account created — welcome to Shashank Computics!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -81,6 +106,7 @@ function AuthPage() {
       setBusy(false);
     }
   };
+
 
   return (
     <div className="section-shell flex justify-center pt-28 pb-24">
@@ -119,21 +145,61 @@ function AuthPage() {
                   className="mt-1"
                 />
               </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">School / college studying in</span>
+                <Input
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
+                  placeholder="e.g. Govt. PU College, Sirsi"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Current occupation</span>
+                <Input
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value)}
+                  placeholder="e.g. Student, Working professional"
+                  className="mt-1"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Email ID</span>
+                <Input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="mt-1"
+                />
+              </label>
             </>
           )}
 
           <label className="block text-sm">
             <span className="text-muted-foreground">Password</span>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </label>
+
 
           <label className="block text-sm">
             <span className="text-muted-foreground">
