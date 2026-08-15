@@ -49,11 +49,15 @@ function StaysPage() {
   const [form, setForm] = useState({ ...EMPTY });
 
   const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ["stay_reviews"],
+    queryKey: ["stay_reviews", user?.id ?? "anon"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stay_reviews")
-        .select("*")
+        .select(
+          user
+            ? "id, user_id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at"
+            : "id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -198,7 +202,7 @@ function StaysPage() {
               {r.rent_monthly ? `₹${r.rent_monthly}/month · ` : ""}
               {r.author_name}
             </p>
-            {(isAdmin || r.user_id === user?.id) && (
+            {(isAdmin || ("user_id" in r && r.user_id === user?.id)) && (
               <button
                 type="button"
                 onClick={() => remove.mutate(r.id)}

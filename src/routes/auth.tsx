@@ -1,9 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usernameToEmail } from "@/hooks/useAuth";
-import { ensureAdminAccount } from "@/lib/admin-bootstrap.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -45,10 +44,6 @@ function AuthPage() {
   const [captcha, setCaptcha] = useState(newCaptcha);
   const [captchaInput, setCaptchaInput] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    void ensureAdminAccount().catch(() => undefined);
-  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
