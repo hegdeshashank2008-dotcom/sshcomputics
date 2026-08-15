@@ -118,22 +118,22 @@ function MaterialsPage() {
       return;
     }
     const tab = window.open("", "_blank", "noopener");
-    const openMaterial = async (path: string) => {
-  if (!user) {
-    toast.error("Please sign in to open files.");
-    return;
+  const openMaterial = async (path: string) => {
+    if (!user) {
+       toast.error("Please sign in to open files.");
+       return;
   }
 
-  try {
-    const { data, error } = await supabase.storage
-      .from("materials")
-      .createSignedUrl(path, 300);
+    try {
+       const { data, error } = await supabase.storage
+       .from("materials")
+       .createSignedUrl(path, 300);
 
     if (error || !data?.signedUrl) {
       console.error("Error creating signed URL:", error);
       toast.error("Could not open that file.");
       return;
-    }
+   }
 
     // Open the PDF directly
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
