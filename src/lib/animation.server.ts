@@ -31,8 +31,14 @@ export async function createVideoJob(prompt: string) {
   });
   if (!res.ok) {
     const err = (await res.json().catch(() => null)) as { message?: string } | null;
+    if (res.status === 402) {
+      throw new Error(
+        "AI video credits are exhausted, so a new animation can't be rendered right now. Use the free animated lessons below or ask the admin to top up credits.",
+      );
+    }
     throw new Error(err?.message ?? `Video generation failed (${res.status}).`);
   }
+
   return (await res.json()) as { id: string; status: string };
 }
 
