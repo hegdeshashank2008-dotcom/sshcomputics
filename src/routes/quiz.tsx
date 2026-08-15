@@ -8,6 +8,7 @@ import { generateQuiz } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { LoginNotice } from "@/components/LoginNotice";
 
 const CLASSES = [
   ...Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`),
@@ -111,6 +112,7 @@ function QuizPage() {
 
   return (
     <div className="section-shell pt-28 pb-24">
+      <LoginNotice what="quiz generation and saved attempts" />
       <h1 className="text-4xl font-bold md:text-5xl">
         Quiz <span className="text-gradient">Generator</span>
       </h1>

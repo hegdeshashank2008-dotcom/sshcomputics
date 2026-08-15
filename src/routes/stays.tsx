@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { LoginNotice } from "@/components/LoginNotice";
 
 export const Route = createFileRoute("/stays")({
   head: () => ({
@@ -142,6 +143,7 @@ function StaysPage() {
 
   return (
     <div className="section-shell pt-28 pb-24">
+      <LoginNotice what="publishing hostel & PG reviews" />
       <h1 className="text-4xl font-bold md:text-5xl">
         Hostel & <span className="text-gradient">PG Reviews</span>
       </h1>
