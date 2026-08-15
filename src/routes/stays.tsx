@@ -51,14 +51,16 @@ function StaysPage() {
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ["stay_reviews", user?.id ?? "anon"],
     queryFn: async () => {
+      // user_id is only readable by signed-in users; anonymous visitors get
+      // review content without the submitter's account id.
+      const publicCols =
+        "id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at";
+      const cols = user ? `${publicCols}, user_id` : publicCols;
       const { data, error } = await supabase
         .from("stay_reviews")
-        .select(
-          user
-            ? "id, user_id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at"
-            : "id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at",
-        )
-        .order("created_at", { ascending: false });
+        .select(cols)
+        .order("created_at", { ascending: false })
+        .returns<StayRow[]>();
       if (error) throw error;
       return data;
     },
