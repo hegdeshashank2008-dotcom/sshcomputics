@@ -365,7 +365,7 @@ function Feedback({ collegeId }: { collegeId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("college_feedback")
-        .select("*")
+        .select("id, college_id, author_name, rating, comment, created_at")
         .eq("college_id", collegeId)
         .order("created_at", { ascending: false });
       if (error) throw error;
