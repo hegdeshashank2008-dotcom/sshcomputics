@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { LoginNotice } from "@/components/LoginNotice";
 
 export const Route = createFileRoute("/colleges")({
   head: () => ({
@@ -158,6 +159,7 @@ function CollegesPage() {
 
   return (
     <div className="section-shell pt-28 pb-24">
+      <LoginNotice what="posting college feedback and submissions" />
       <h1 className="text-4xl font-bold md:text-5xl">
         Engineering <span className="text-gradient">Colleges & Placements</span>
       </h1>

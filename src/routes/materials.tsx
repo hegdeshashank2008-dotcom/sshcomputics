@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { LoginNotice } from "@/components/LoginNotice";
 
 export const Route = createFileRoute("/materials")({
   head: () => ({
@@ -129,6 +130,7 @@ function MaterialsPage() {
 
   return (
     <div className="section-shell pt-28 pb-24">
+      <LoginNotice what="opening and downloading study materials" />
       <h1 className="text-4xl font-bold md:text-5xl">
         Study <span className="text-gradient">Materials</span>
       </h1>

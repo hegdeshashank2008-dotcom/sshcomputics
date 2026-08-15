@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Rotatable3D } from "@/components/Rotatable3D";
 import { startAnimation, pollAnimation } from "@/lib/animation.functions";
+import { LoginNotice } from "@/components/LoginNotice";
 
 export const Route = createFileRoute("/animations")({
   head: () => ({
@@ -130,6 +131,7 @@ function AnimationsPage() {
 
   return (
     <div className="section-shell pt-28 pb-24">
+      <LoginNotice what="generating animated lessons" />
       <header className="max-w-3xl">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs uppercase tracking-widest text-primary">
           <Film className="h-3.5 w-3.5" /> Animated lessons
