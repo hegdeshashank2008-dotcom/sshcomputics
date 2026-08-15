@@ -40,8 +40,12 @@ function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [classLevel, setClassLevel] = useState("");
+  const [school, setSchool] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [captcha, setCaptcha] = useState(newCaptcha);
   const [captchaInput, setCaptchaInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -58,15 +62,35 @@ function AuthPage() {
     const email = usernameToEmail(username);
     try {
       if (mode === "register") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { username: username.trim(), full_name: fullName, class_level: classLevel },
+            data: {
+              username: username.trim(),
+              full_name: fullName,
+              class_level: classLevel,
+              school,
+              occupation,
+              email: contactEmail,
+            },
           },
         });
         if (error) throw error;
+        const newUser = data.user;
+        if (newUser) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: newUser.id,
+            username: username.trim(),
+            full_name: fullName.trim() || null,
+            class_level: classLevel.trim() || null,
+            school: school.trim() || null,
+            occupation: occupation.trim() || null,
+            email: contactEmail.trim() || null,
+          });
+          if (profileError) console.error(profileError);
+        }
         toast.success("Account created — welcome to Shashank Computics!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -82,6 +106,7 @@ function AuthPage() {
       setBusy(false);
     }
   };
+
 
   return (
     <div className="section-shell flex justify-center pt-28 pb-24">
