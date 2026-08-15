@@ -42,6 +42,23 @@ const EMPTY = {
   comment: "",
 };
 
+type StayRow = {
+  id: string;
+  user_id?: string | null;
+  stay_type: string;
+  name: string;
+  state: string;
+  district: string;
+  city: string;
+  address: string | null;
+  rent_monthly: number | null;
+  rating: number;
+  author_name: string;
+  comment: string | null;
+  approved: boolean;
+  created_at: string;
+};
+
 function StaysPage() {
   const { user, username, isAdmin } = useAuth();
   const qc = useQueryClient();
@@ -49,12 +66,18 @@ function StaysPage() {
   const [form, setForm] = useState({ ...EMPTY });
 
   const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ["stay_reviews"],
+    queryKey: ["stay_reviews", user?.id ?? "anon"],
     queryFn: async () => {
+      // user_id is only readable by signed-in users; anonymous visitors get
+      // review content without the submitter's account id.
+      const publicCols =
+        "id, stay_type, name, state, district, city, address, rent_monthly, rating, author_name, comment, approved, created_at";
+      const cols = user ? `${publicCols}, user_id` : publicCols;
       const { data, error } = await supabase
         .from("stay_reviews")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select(cols)
+        .order("created_at", { ascending: false })
+        .returns<StayRow[]>();
       if (error) throw error;
       return data;
     },
@@ -198,7 +221,7 @@ function StaysPage() {
               {r.rent_monthly ? `₹${r.rent_monthly}/month · ` : ""}
               {r.author_name}
             </p>
-            {(isAdmin || r.user_id === user?.id) && (
+            {(isAdmin || ("user_id" in r && r.user_id === user?.id)) && (
               <button
                 type="button"
                 onClick={() => remove.mutate(r.id)}

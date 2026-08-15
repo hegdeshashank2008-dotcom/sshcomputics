@@ -67,6 +67,10 @@ function QuizPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const generate = async () => {
+    if (!user) {
+      toast.error("Please sign in to generate a quiz.");
+      return;
+    }
     if (!topic.trim()) {
       toast.error("Please write the topic you want the quiz on.");
       return;
@@ -174,7 +178,13 @@ function QuizPage() {
         </label>
       </div>
 
-      <Button onClick={generate} disabled={loading} className="mt-5 gap-2">
+      {!user && (
+        <p className="mt-5 text-sm text-muted-foreground">
+          Sign in to generate quizzes — attempts are saved to your study tracker.
+        </p>
+      )}
+
+      <Button onClick={generate} disabled={loading || !user} className="mt-5 gap-2">
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
         Generate quiz
       </Button>
